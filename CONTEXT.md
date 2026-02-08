@@ -93,8 +93,8 @@ Ver archivo: `/supabase/schema.sql`
 | Auth (Supabase) | ✅ Completado | SignIn, SignUp, SignOut, protección de rutas |
 | Componentes UI | ✅ Completado | Button, Input, Card (Shadcn-style) |
 | Dashboard Base | ✅ Completado | Layout con navegación, quick actions |
-| Mood Tracker | ⏳ Pendiente | Próximo paso |
-| Chat con IA | ⏳ Pendiente | - |
+| Mood Tracker | ✅ Completado | Formulario con sliders + selector de emociones |
+| Chat con IA | ⏳ Pendiente | Próximo paso |
 | Lockdown Mode | ⏳ Pendiente | - |
 
 ---
