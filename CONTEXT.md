@@ -97,6 +97,7 @@ Ver archivo: `/supabase/schema.sql`
 | Chat con IA | ✅ Completado | GPT-4o con streaming + anonimización |
 | Lockdown Mode | ✅ Completado | Detección de riesgo + botón de emergencia |
 | Analytics | ✅ Completado | Gráficos de tendencias + stats semanales |
+| Stress Logs | ✅ Completado | Análisis de mecanismos de defensa |
 
 ---
 
