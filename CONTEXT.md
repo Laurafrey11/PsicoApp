@@ -4,7 +4,7 @@
 - **Nombre**: Ego-Core
 - **Descripción**: Aplicación de bio-hacking emocional y seguimiento terapéutico con IA
 - **Versión**: 0.1.0
-- **Estado**: Setup Inicial
+- **Estado**: MVP Completo
 
 ---
 
@@ -98,6 +98,8 @@ Ver archivo: `/supabase/schema.sql`
 | Lockdown Mode | ✅ Completado | Detección de riesgo + botón de emergencia |
 | Analytics | ✅ Completado | Gráficos de tendencias + stats semanales |
 | Stress Logs | ✅ Completado | Análisis de mecanismos de defensa |
+| Settings | ✅ Completado | Perfil, idioma, privacidad |
+| Dashboard | ✅ Mejorado | Datos reales de mood y stats |
 
 ---
 
