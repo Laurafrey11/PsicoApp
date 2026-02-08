@@ -96,6 +96,7 @@ Ver archivo: `/supabase/schema.sql`
 | Mood Tracker | ✅ Completado | Formulario con sliders + selector de emociones |
 | Chat con IA | ✅ Completado | GPT-4o con streaming + anonimización |
 | Lockdown Mode | ✅ Completado | Detección de riesgo + botón de emergencia |
+| Analytics | ✅ Completado | Gráficos de tendencias + stats semanales |
 
 ---
 
