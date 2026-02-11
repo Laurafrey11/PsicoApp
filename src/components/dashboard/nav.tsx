@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import type { User } from '@supabase/supabase-js';
 import {
   Brain,
   LayoutDashboard,
@@ -13,19 +12,12 @@ import {
   TrendingUp,
   Zap,
   Settings,
-  LogOut,
   Menu,
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui';
-import { signOut } from '@/lib/actions/auth';
 
-interface DashboardNavProps {
-  user: User;
-}
-
-export function DashboardNav({ user }: DashboardNavProps) {
+export function DashboardNav() {
   const t = useTranslations();
   const pathname = usePathname();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -40,7 +32,6 @@ export function DashboardNav({ user }: DashboardNavProps) {
   ];
 
   const isActive = (href: string) => {
-    // Remove locale prefix and check if path matches
     const cleanPath = pathname.replace(/^\/(es|en)/, '');
     return cleanPath === href || cleanPath.startsWith(href + '/');
   };
@@ -105,32 +96,11 @@ export function DashboardNav({ user }: DashboardNavProps) {
             ))}
           </nav>
 
-          {/* User section */}
+          {/* Footer */}
           <div className="p-4 border-t border-zinc-800">
-            <div className="flex items-center gap-3 mb-4 px-2">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-teal-400 flex items-center justify-center text-zinc-900 font-medium">
-                {user.email?.charAt(0).toUpperCase()}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-zinc-100 truncate">
-                  {user.user_metadata?.full_name || 'Usuario'}
-                </p>
-                <p className="text-xs text-zinc-500 truncate">
-                  {user.email}
-                </p>
-              </div>
-            </div>
-
-            <form action={signOut}>
-              <Button
-                type="submit"
-                variant="ghost"
-                className="w-full justify-start text-zinc-400 hover:text-red-400"
-              >
-                <LogOut className="w-5 h-5" />
-                {t('auth.signOut')}
-              </Button>
-            </form>
+            <p className="text-xs text-zinc-600 text-center">
+              Ego-Core v0.1.0
+            </p>
           </div>
         </div>
       </aside>
