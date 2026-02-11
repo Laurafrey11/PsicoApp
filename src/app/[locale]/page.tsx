@@ -35,14 +35,14 @@ export default function HomePage() {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
             <a
-              href="/auth/signup"
+              href="/signup"
               className="group flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-400 rounded-xl text-zinc-900 font-semibold transition-all hover:shadow-lg hover:shadow-cyan-500/25 hover:scale-105"
             >
               {t('onboarding.getStarted')}
               <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
             </a>
             <a
-              href="/auth/signin"
+              href="/signin"
               className="flex items-center gap-2 px-8 py-4 border border-zinc-700 rounded-xl text-zinc-300 font-medium transition-all hover:bg-zinc-800 hover:border-zinc-600"
             >
               {t('auth.signIn')}
