@@ -1,10 +1,7 @@
 import { getTranslations } from 'next-intl/server';
-import { createClient } from '@/lib/supabase/server';
 import { Brain, Heart, TrendingUp, MessageCircle, Smile, Frown, Meh, Moon, Zap, ArrowRight } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import Link from 'next/link';
-import { getTodayMood } from '@/lib/actions/mood';
-import { getWeeklyStats } from '@/lib/actions/analytics';
 
 const emotionEmojis: Record<string, string> = {
   joy: '😊',
@@ -21,23 +18,11 @@ const emotionEmojis: Record<string, string> = {
 
 export default async function DashboardPage() {
   const t = await getTranslations();
-  const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
-
-  // Get data in parallel
-  const [todayMood, weeklyStats] = await Promise.all([
-    getTodayMood(),
-    getWeeklyStats(),
-  ]);
-
-  // Get user's first name
-  let firstName = 'Usuario';
-  if (user?.user_metadata?.full_name) {
-    firstName = String(user.user_metadata.full_name).split(' ')[0];
-  } else if (user?.email) {
-    firstName = user.email.split('@')[0];
-  }
+  // Demo data for public access
+  const todayMood = null;
+  const weeklyStats = null;
+  const firstName = 'Usuario';
 
   return (
     <div className="space-y-8 animate-fade-in">
