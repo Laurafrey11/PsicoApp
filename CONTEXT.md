@@ -142,17 +142,28 @@ EMERGENCY_CONTACT_PHONE=1167409207
 
 ---
 
-## Próximos Pasos
+## URLs de Producción
 
-1. [ ] Configurar credenciales de Supabase
-2. [ ] Configurar credenciales de OpenAI
-3. [ ] Implementar autenticación con Supabase Auth
-4. [ ] Crear componentes UI base (Shadcn/UI)
-5. [ ] Implementar Mood Tracker
+- **App**: https://psico-app-chi.vercel.app
+- **GitHub**: https://github.com/Laurafrey11/PsicoApp
+- **Supabase**: https://epatndasoobzcldxwudy.supabase.co
+
+## Estado Actual
+
+✅ **MVP Completo y Deployado**
+- App pública sin autenticación (acceso directo al dashboard)
+- Todas las features funcionando
+- Deploy automático en Vercel
 
 ---
 
 ## Changelog
+
+### 2026-02-10
+- App deployada en Vercel: https://psico-app-chi.vercel.app
+- Removida autenticación (acceso público directo)
+- Corregidos links de navegación
+- Simplificado middleware para i18n
 
 ### 2026-02-08
 - Creación inicial del proyecto
@@ -161,3 +172,11 @@ EMERGENCY_CONTACT_PHONE=1167409207
 - Creación de CONTEXT.md
 - Definición de schema.sql
 - Configuración base de i18n
+- Implementación completa del MVP:
+  - Dashboard con stats
+  - Mood Tracker
+  - Chat con IA (GPT-4o)
+  - Analytics con gráficos
+  - Stress Logs con análisis de mecanismos de defensa
+  - Lockdown Mode para emergencias
+  - Settings
