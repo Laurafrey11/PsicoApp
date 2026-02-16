@@ -4,6 +4,7 @@ import { Heart, MessageCircle, TrendingUp, Brain, Meh, ArrowRight, Calendar } fr
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { WellnessIndicators } from './wellness-indicators';
+import { CsvUploadWidget } from './csv-upload-widget';
 
 export interface WidgetDefinition {
   id: string;
@@ -150,6 +151,7 @@ export const WIDGET_REGISTRY: WidgetDefinition[] = [
   { id: 'todayMood', titleKey: 'dashboard.todayMood', component: TodayMoodWidget },
   { id: 'weeklyOverview', titleKey: 'dashboard.weeklyOverview', component: WeeklyOverviewWidget },
   { id: 'calendly', titleKey: 'dashboard.calendly', component: CalendlyWidget },
+  { id: 'csvUpload', titleKey: 'csvUpload.title', component: CsvUploadWidget },
 ];
 
 export const DEFAULT_LAYOUT: string[] = [
@@ -158,4 +160,5 @@ export const DEFAULT_LAYOUT: string[] = [
   'todayMood',
   'weeklyOverview',
   'calendly',
+  'csvUpload',
 ];

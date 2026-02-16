@@ -213,6 +213,22 @@
     "acceptTerms": "I have read and accept the terms of use. I understand that this assistant does not replace professional care.",
     "continue": "Accept and continue"
   },
+  "csvUpload": {
+    "title": "Import data (CSV)",
+    "description": "Upload a CSV file with mood records. Columns must follow this format:",
+    "column": "Column",
+    "type": "Type",
+    "required": "Required",
+    "values": "Values",
+    "dropzone": "Drag a .csv file here or click to select",
+    "preview": "Preview",
+    "import": "Import records",
+    "importing": "Importing...",
+    "success": "{count} records imported successfully",
+    "error": "Import error",
+    "validationErrors": "Validation errors",
+    "downloadTemplate": "Download CSV template"
+  },
   "errors": {
     "generic": "Something went wrong. Please try again.",
     "network": "Connection error. Check your internet.",

@@ -213,6 +213,22 @@
     "acceptTerms": "He leído y acepto los términos de uso. Entiendo que este asistente no reemplaza la atención profesional.",
     "continue": "Aceptar y continuar"
   },
+  "csvUpload": {
+    "title": "Importar datos (CSV)",
+    "description": "Cargá un archivo CSV con registros de estado de ánimo. Las columnas deben seguir este formato:",
+    "column": "Columna",
+    "type": "Tipo",
+    "required": "Requerida",
+    "values": "Valores",
+    "dropzone": "Arrastrá un archivo .csv acá o hacé clic para seleccionar",
+    "preview": "Vista previa",
+    "import": "Importar registros",
+    "importing": "Importando...",
+    "success": "{count} registros importados correctamente",
+    "error": "Error al importar",
+    "validationErrors": "Errores de validación",
+    "downloadTemplate": "Descargar plantilla CSV"
+  },
   "errors": {
     "generic": "Algo salió mal. Por favor, intenta de nuevo.",
     "network": "Error de conexión. Verifica tu internet.",
