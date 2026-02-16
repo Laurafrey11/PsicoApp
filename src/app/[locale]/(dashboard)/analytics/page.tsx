@@ -1,20 +1,22 @@
 import { getTranslations } from 'next-intl/server';
-import { TrendingUp, Heart, Zap, Brain, Moon, Calendar, Smile } from 'lucide-react';
+import { TrendingUp, Heart, Zap, Brain, Moon, Calendar, Smile, Shield, BedDouble, Lightbulb } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
-import { StatsCard, MoodChart, EmotionChart } from '@/components/analytics';
+import { StatsCard, MoodChart, EmotionChart, DefenseChart, SleepMoodChart, PatternInsights } from '@/components/analytics';
 import {
   getMoodHistory,
   getEmotionDistribution,
   getWeeklyStats,
+  getDefenseMechanismsStats,
 } from '@/lib/actions/analytics';
 
 export default async function AnalyticsPage() {
   const t = await getTranslations();
 
-  const [moodHistory, emotionData, weeklyStats] = await Promise.all([
+  const [moodHistory, emotionData, weeklyStats, defenseData] = await Promise.all([
     getMoodHistory(30),
     getEmotionDistribution(30),
     getWeeklyStats(),
+    getDefenseMechanismsStats(30),
   ]);
 
   const trendLabels = {
@@ -119,9 +121,8 @@ export default async function AnalyticsPage() {
         </div>
       )}
 
-      {/* Charts */}
+      {/* Charts: Mood Trend + Emotions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Mood Trend Chart */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>{t('analytics.moodTrend')}</CardTitle>
@@ -131,7 +132,6 @@ export default async function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        {/* Emotion Distribution */}
         <Card>
           <CardHeader>
             <CardTitle>Emociones</CardTitle>
@@ -142,7 +142,85 @@ export default async function AnalyticsPage() {
         </Card>
       </div>
 
-      {/* Summary */}
+      {/* Sleep vs Mood Correlation */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BedDouble className="w-5 h-5 text-indigo-400" />
+            Ánimo vs Sueño
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-zinc-500 mb-4">
+            Comparación diaria entre tu nivel de ánimo y calidad de sueño. Observá si los días que dormís mejor coinciden con mejor ánimo.
+          </p>
+          <SleepMoodChart data={moodHistory} />
+        </CardContent>
+      </Card>
+
+      {/* Defense Mechanisms */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-violet-400" />
+              Mecanismos de Defensa
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-zinc-500 mb-4">
+              Patrones de respuesta emocional detectados en tus registros de estrés.
+            </p>
+            <DefenseChart data={defenseData} />
+          </CardContent>
+        </Card>
+
+        <Card className="border-violet-500/10">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-violet-400" />
+              ¿Qué son los mecanismos de defensa?
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3 text-sm text-zinc-400">
+              <p>
+                Son estrategias psicológicas inconscientes que usamos para protegernos del malestar emocional.
+                Todos los usamos — no son &quot;buenos&quot; ni &quot;malos&quot;.
+              </p>
+              <p>
+                Reconocer cuáles usás más te ayuda a entender cómo reaccionás ante el estrés y
+                a desarrollar respuestas más conscientes.
+              </p>
+              <div className="bg-zinc-800/50 rounded-lg p-3 mt-2">
+                <p className="text-xs text-zinc-500 mb-2">Ejemplos:</p>
+                <ul className="space-y-1 text-xs text-zinc-400">
+                  <li><strong className="text-emerald-400">Sublimación</strong> — Canalizar estrés en actividades productivas (saludable)</li>
+                  <li><strong className="text-cyan-400">Racionalización</strong> — Buscar explicaciones lógicas para emociones</li>
+                  <li><strong className="text-orange-400">Negación</strong> — Minimizar el impacto de una situación</li>
+                  <li><strong className="text-violet-400">Proyección</strong> — Atribuir sentimientos propios a otros</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Pattern Insights */}
+      <div>
+        <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2 mb-4">
+          <Lightbulb className="w-5 h-5 text-cyan-500" />
+          Patrones Detectados
+        </h2>
+        <PatternInsights
+          moodHistory={moodHistory}
+          weeklyStats={weeklyStats}
+          emotionData={emotionData}
+          defenseData={defenseData}
+        />
+      </div>
+
+      {/* Weekly Summary */}
       {weeklyStats && (
         <Card>
           <CardHeader>

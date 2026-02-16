@@ -182,6 +182,9 @@
     "moodTrend": "Mood trend",
     "stressPatterns": "Stress patterns",
     "sleepCorrelation": "Sleep correlation",
+    "sleepMoodCorrelation": "Mood vs Sleep",
+    "defenseMechanisms": "Defense Mechanisms",
+    "patternsDetected": "Detected Patterns",
     "improvement": "Improvement",
     "decline": "Decline",
     "stable": "Stable"

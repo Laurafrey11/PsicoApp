@@ -182,6 +182,9 @@
     "moodTrend": "Tendencia de ánimo",
     "stressPatterns": "Patrones de estrés",
     "sleepCorrelation": "Correlación con sueño",
+    "sleepMoodCorrelation": "Ánimo vs Sueño",
+    "defenseMechanisms": "Mecanismos de Defensa",
+    "patternsDetected": "Patrones Detectados",
     "improvement": "Mejora",
     "decline": "Declive",
     "stable": "Estable"
