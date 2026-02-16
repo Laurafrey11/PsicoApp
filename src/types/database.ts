@@ -147,6 +147,25 @@ export interface EmergencyLog {
   session_id: string | null;
 }
 
+export interface IPReferral {
+  id: string;
+  ip_address: string;
+  referred_at: string;
+  blocked_at: string | null;
+  blocked_until: string | null;
+  attempts_after_referral: number;
+  last_attempt_at: string | null;
+  reason: string | null;
+  created_at: string;
+}
+
+export type IPReferralInsert = Omit<IPReferral, 'id' | 'created_at'> & {
+  id?: string;
+  created_at?: string;
+};
+
+export type IPReferralUpdate = Partial<Omit<IPReferral, 'id' | 'created_at'>>;
+
 // =============================================================================
 // Insert Types (for creating new records)
 // =============================================================================
@@ -233,6 +252,11 @@ export interface Database {
         Row: EmergencyLog;
         Insert: EmergencyLogInsert;
         Update: Partial<EmergencyLog>;
+      };
+      ip_referrals: {
+        Row: IPReferral;
+        Insert: IPReferralInsert;
+        Update: IPReferralUpdate;
       };
     };
     Functions: {

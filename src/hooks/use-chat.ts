@@ -11,6 +11,8 @@ export interface Message {
 interface UseChatOptions {
   api?: string;
   onError?: (error: Error) => void;
+  onBlocked?: (blockedUntil: string | null) => void;
+  onReferralNeeded?: (contexto: string) => void;
 }
 
 interface UseChatReturn {
@@ -21,8 +23,10 @@ interface UseChatReturn {
   setMessages: (messages: Message[]) => void;
 }
 
+const REFERRAL_MARKER = '[DERIVAR_PROFESIONAL]';
+
 export function useChatCustom(options: UseChatOptions = {}): UseChatReturn {
-  const { api = '/api/chat', onError } = options;
+  const { api = '/api/chat', onError, onBlocked, onReferralNeeded } = options;
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -36,7 +40,6 @@ export function useChatCustom(options: UseChatOptions = {}): UseChatReturn {
         content,
       };
 
-      // Add user message immediately
       setMessages((prev) => [...prev, userMessage]);
       setIsLoading(true);
       setError(null);
@@ -55,12 +58,16 @@ export function useChatCustom(options: UseChatOptions = {}): UseChatReturn {
           }),
         });
 
-        // Check if response is JSON (lockdown mode)
+        // Verificar si la respuesta es JSON (lockdown o bloqueo)
         const contentType = response.headers.get('content-type');
         if (contentType?.includes('application/json')) {
           const data = await response.json();
           if (data.lockdown) {
-            // Return early, lockdown will be handled by the component
+            setIsLoading(false);
+            return;
+          }
+          if (data.blocked) {
+            onBlocked?.(data.blockedUntil ?? null);
             setIsLoading(false);
             return;
           }
@@ -70,7 +77,7 @@ export function useChatCustom(options: UseChatOptions = {}): UseChatReturn {
           throw new Error('Error en la respuesta del servidor');
         }
 
-        // Handle streaming response
+        // Manejar streaming
         const reader = response.body?.getReader();
         const decoder = new TextDecoder();
 
@@ -78,7 +85,6 @@ export function useChatCustom(options: UseChatOptions = {}): UseChatReturn {
           throw new Error('No se pudo leer la respuesta');
         }
 
-        // Add assistant message placeholder
         const assistantMessage: Message = {
           id: `assistant-${Date.now()}`,
           role: 'assistant',
@@ -87,7 +93,6 @@ export function useChatCustom(options: UseChatOptions = {}): UseChatReturn {
 
         setMessages((prev) => [...prev, assistantMessage]);
 
-        // Read the stream
         let fullContent = '';
         while (true) {
           const { done, value } = await reader.read();
@@ -96,14 +101,24 @@ export function useChatCustom(options: UseChatOptions = {}): UseChatReturn {
           const chunk = decoder.decode(value, { stream: true });
           fullContent += chunk;
 
-          // Update assistant message content
+          // Mostrar contenido sin el marcador de derivación
+          const displayContent = fullContent
+            .replace(REFERRAL_MARKER, '')
+            .trimEnd();
+
           setMessages((prev) =>
             prev.map((m) =>
               m.id === assistantMessage.id
-                ? { ...m, content: fullContent }
+                ? { ...m, content: displayContent }
                 : m
             )
           );
+        }
+
+        // Después de completar el stream, verificar si hubo derivación
+        if (fullContent.includes(REFERRAL_MARKER)) {
+          const cleanContent = fullContent.replace(REFERRAL_MARKER, '').trimEnd();
+          onReferralNeeded?.(cleanContent);
         }
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Error desconocido');
@@ -113,7 +128,7 @@ export function useChatCustom(options: UseChatOptions = {}): UseChatReturn {
         setIsLoading(false);
       }
     },
-    [api, messages, onError]
+    [api, messages, onError, onBlocked, onReferralNeeded]
   );
 
   return {

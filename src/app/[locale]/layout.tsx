@@ -32,6 +32,13 @@ export const metadata: Metadata = {
     'bio-hacking',
   ],
   authors: [{ name: 'Ego-Core Team' }],
+  manifest: '/manifest.json',
+  themeColor: '#06b6d4',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Ego-Core',
+  },
   openGraph: {
     type: 'website',
     locale: 'es_AR',
@@ -57,12 +64,28 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
 
   return (
     <html lang={locale} className="dark">
+      <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
         <NextIntlClientProvider messages={messages}>
           {children}
         </NextIntlClientProvider>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                  navigator.serviceWorker.register('/sw.js').catch(() => {});
+                });
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   );

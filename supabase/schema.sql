@@ -350,3 +350,26 @@ BEGIN
     LIMIT 1;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- =============================================================================
+-- TABLA: ip_referrals
+-- Registro de derivaciones a profesional por IP (app pública sin auth)
+-- =============================================================================
+CREATE TABLE public.ip_referrals (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    ip_address TEXT NOT NULL,
+    referred_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    blocked_at TIMESTAMPTZ,
+    blocked_until TIMESTAMPTZ,
+    attempts_after_referral INTEGER DEFAULT 0,
+    last_attempt_at TIMESTAMPTZ,
+    reason TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Índices para ip_referrals
+CREATE INDEX idx_ip_referrals_ip ON public.ip_referrals(ip_address);
+CREATE INDEX idx_ip_referrals_blocked_until ON public.ip_referrals(blocked_until);
+
+-- RLS habilitado sin policies: solo accesible via service role key
+ALTER TABLE public.ip_referrals ENABLE ROW LEVEL SECURITY;

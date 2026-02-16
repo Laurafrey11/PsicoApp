@@ -2,23 +2,23 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Phone, Heart, AlertTriangle, X } from 'lucide-react';
+import { Mail, Heart, AlertTriangle, X, Phone, CalendarPlus } from 'lucide-react';
 import { Button } from '@/components/ui';
 
 interface LockdownModeProps {
   onDismiss: () => void;
-  emergencyPhone?: string;
+  professionalEmail?: string;
 }
 
 export function LockdownMode({
   onDismiss,
-  emergencyPhone = '1167409207',
+  professionalEmail = 'lalifreyre.lf@gmail.com',
 }: LockdownModeProps) {
   const t = useTranslations('emergency');
   const [showConfirm, setShowConfirm] = useState(false);
 
-  function handleCall() {
-    window.location.href = `tel:${emergencyPhone}`;
+  function handleEmail() {
+    window.location.href = `mailto:${professionalEmail}`;
   }
 
   function handleDismissClick() {
@@ -32,7 +32,7 @@ export function LockdownMode({
   return (
     <div className="fixed inset-0 z-50 bg-zinc-950/95 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="max-w-md w-full animate-fade-in">
-        {/* Alert icon with pulse */}
+        {/* Icono de alerta con pulso */}
         <div className="flex justify-center mb-8">
           <div className="relative">
             <div className="w-24 h-24 rounded-full bg-red-500/20 flex items-center justify-center animate-emergency-pulse">
@@ -42,7 +42,7 @@ export function LockdownMode({
           </div>
         </div>
 
-        {/* Message */}
+        {/* Mensaje */}
         <div className="text-center space-y-4 mb-8">
           <h1 className="text-2xl font-bold text-zinc-100">
             {t('title')}
@@ -56,22 +56,35 @@ export function LockdownMode({
           </div>
         </div>
 
-        {/* Call button - prominent */}
+        {/* Botón de contacto - prominente */}
         <Button
-          onClick={handleCall}
+          onClick={handleEmail}
           size="lg"
           className="w-full bg-red-600 hover:bg-red-700 text-white text-xl py-6 mb-4 animate-pulse"
         >
-          <Phone className="w-6 h-6" />
-          {t('callNow')}
+          <Mail className="w-6 h-6" />
+          {t('contactNow')}
         </Button>
 
-        {/* Emergency number display */}
+        {/* Agendar turno */}
+        {process.env.NEXT_PUBLIC_CALENDLY_URL && (
+          <a
+            href={process.env.NEXT_PUBLIC_CALENDLY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-semibold py-3 rounded-xl mb-4 transition-colors"
+          >
+            <CalendarPlus className="w-5 h-5" />
+            {t('scheduleAppointment')}
+          </a>
+        )}
+
+        {/* Email de la profesional */}
         <p className="text-center text-zinc-400 mb-8">
-          {t('callProfessional')}: <span className="text-zinc-200 font-mono">{emergencyPhone}</span>
+          {t('callProfessional')}: <span className="text-zinc-200 font-mono">{professionalEmail}</span>
         </p>
 
-        {/* Dismiss option */}
+        {/* Opción de dismiss */}
         {!showConfirm ? (
           <button
             onClick={handleDismissClick}
@@ -98,19 +111,20 @@ export function LockdownMode({
                 className="flex-1 text-zinc-400"
                 onClick={handleConfirmDismiss}
               >
-                Sí, estoy bien
+                {t('imOkay')}
               </Button>
             </div>
           </div>
         )}
 
-        {/* Resources link */}
+        {/* Línea de crisis como recurso secundario */}
         <div className="mt-8 pt-6 border-t border-zinc-800">
           <p className="text-center text-zinc-500 text-sm">
-            Líneas de ayuda 24/7:
+            {t('crisisLine')} 24/7:
           </p>
           <div className="flex justify-center gap-4 mt-2 text-sm">
-            <a href="tel:135" className="text-cyan-500 hover:text-cyan-400">
+            <a href="tel:135" className="text-cyan-500 hover:text-cyan-400 flex items-center gap-1">
+              <Phone className="w-3 h-3" />
               Centro de Asistencia al Suicida: 135
             </a>
           </div>

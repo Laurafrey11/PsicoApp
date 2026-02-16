@@ -10,7 +10,11 @@
       "Bash(git commit:*)",
       "WebFetch(domain:psico-app-nine.vercel.app)",
       "Bash(curl:*)",
-      "Bash(gh api:*)"
+      "Bash(gh api:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npx vercel:*)",
+      "Bash(start https://psico-app-chi.vercel.app/es/dashboard)",
+      "Bash(start https://vercel.com/laurafreys-projects/mi-proyecto-psicoapp)"
     ]
   }
 }

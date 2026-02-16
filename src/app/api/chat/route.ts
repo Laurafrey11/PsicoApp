@@ -1,113 +1,137 @@
 import { openai } from '@ai-sdk/openai';
 import { streamText } from 'ai';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { anonymize } from '@/lib/utils/anonymize';
-import { detectRisk } from '@/lib/utils/risk-detector';
 import { THERAPEUTIC_SYSTEM_PROMPT } from '@/lib/openai/system-prompt';
+import {
+  getClientIP,
+  checkIPStatus,
+  isGracePeriodExpired,
+  blockIP,
+  recordAttempt,
+} from '@/lib/utils/ip-manager';
+import { checkRateLimit } from '@/lib/utils/rate-limiter';
 
 export const maxDuration = 30;
+
+const REFERRAL_MARKER = '[DERIVAR_PROFESIONAL]';
 
 export async function POST(req: Request) {
   try {
     const { messages } = await req.json();
-    const supabase = await createClient();
+    const supabase = createAdminClient();
+    const clientIP = getClientIP(req);
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return new Response('No autorizado', { status: 401 });
+    // --- Paso 0: Rate limiting ---
+    const rateLimit = checkRateLimit(clientIP);
+    if (!rateLimit.allowed) {
+      return Response.json(
+        { error: 'Demasiados mensajes. Esperá un rato antes de continuar.', rateLimited: true },
+        { status: 429 }
+      );
     }
 
-    // Obtener el último mensaje del usuario
-    const lastUserMessage = messages[messages.length - 1];
+    // --- Paso 1: Verificar estado de la IP ---
+    const ipStatus = await checkIPStatus(supabase, clientIP);
 
-    if (lastUserMessage?.role === 'user') {
-      // Detectar riesgo
-      const riskResult = detectRisk(lastUserMessage.content);
-
-      // Si hay riesgo alto, guardar log de emergencia
-      if (riskResult.shouldActivateLockdown) {
-        await supabase.from('emergency_logs').insert({
-          user_id: user.id,
-          trigger_message: anonymize(lastUserMessage.content),
-          detected_keywords: riskResult.detectedKeywords,
-          risk_level: riskResult.level,
-          lockdown_activated: true,
-        });
-
-        // Retornar respuesta especial para activar lockdown
-        return Response.json({
-          lockdown: true,
-          riskLevel: riskResult.level,
-        });
-      }
-
-      // Anonimizar el mensaje antes de guardar y enviar
-      const anonymizedContent = anonymize(lastUserMessage.content);
-
-      // Guardar mensaje del usuario
-      await supabase.from('chat_messages').insert({
-        user_id: user.id,
-        role: 'user',
-        content: lastUserMessage.content,
-        content_anonymized: anonymizedContent,
-        flagged_risk: riskResult.level !== 'none',
-        risk_keywords: riskResult.detectedKeywords.length > 0 ? riskResult.detectedKeywords : null,
+    // Si está bloqueada, retornar respuesta de bloqueo
+    if (ipStatus.blocked) {
+      return Response.json({
+        blocked: true,
+        blockedUntil: ipStatus.blockedUntil?.toISOString(),
       });
     }
 
-    // Obtener últimos 15 mensajes para contexto (memoria corto plazo)
-    const { data: recentMessages } = await supabase
-      .from('chat_messages')
-      .select('role, content')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(15);
+    // Si fue derivada, verificar período de gracia
+    if (ipStatus.referred && ipStatus.referralId) {
+      const { data: referralData } = await supabase
+        .from('ip_referrals')
+        .select('*')
+        .eq('id', ipStatus.referralId)
+        .single() as { data: { referred_at: string } | null };
 
-    // Obtener último resumen para contexto (memoria largo plazo)
-    const { data: latestSummary } = await supabase
-      .from('summaries')
-      .select('content, key_insights')
-      .eq('user_id', user.id)
-      .eq('summary_type', 'weekly')
-      .order('period_end', { ascending: false })
-      .limit(1)
-      .single();
+      if (referralData && isGracePeriodExpired(referralData.referred_at)) {
+        // Período de gracia pasó → bloquear IP
+        const blockedUntil = await blockIP(supabase, ipStatus.referralId);
+        await recordAttempt(supabase, ipStatus.referralId);
 
-    // Construir contexto con memoria
-    let systemPrompt = THERAPEUTIC_SYSTEM_PROMPT;
-
-    if (latestSummary) {
-      systemPrompt += `\n\n## Contexto previo del usuario:\n${latestSummary.content}`;
-      if (latestSummary.key_insights) {
-        systemPrompt += `\n\nInsights clave: ${(latestSummary.key_insights as string[]).join(', ')}`;
+        return Response.json({
+          blocked: true,
+          blockedUntil: blockedUntil.toISOString(),
+        });
       }
+
+      // Dentro del período de gracia → registrar intento y continuar
+      await recordAttempt(supabase, ipStatus.referralId);
     }
 
-    // Preparar mensajes para OpenAI (anonimizados)
+    // --- Paso 2: Preparar y enviar a OpenAI ---
     const processedMessages = messages.map((msg: { role: string; content: string }) => ({
       role: msg.role,
       content: msg.role === 'user' ? anonymize(msg.content) : msg.content,
     }));
 
-    // Stream response
+    // La derivación se crea cuando el usuario completa el formulario
+    // (via /api/send-referral), no aquí. El marcador [DERIVAR_PROFESIONAL]
+    // se detecta en el cliente para mostrar el formulario.
     const result = streamText({
       model: openai('gpt-4o'),
-      system: systemPrompt,
+      system: THERAPEUTIC_SYSTEM_PROMPT,
       messages: processedMessages,
-      onFinish: async ({ text }) => {
-        // Guardar respuesta del asistente
-        await supabase.from('chat_messages').insert({
-          user_id: user.id,
-          role: 'assistant',
-          content: text,
-        });
+    });
+
+    // --- Paso 4: Transformar stream para eliminar el marcador ---
+    const originalResponse = result.toTextStreamResponse();
+    const reader = originalResponse.body?.getReader();
+
+    if (!reader) {
+      return new Response('Error al leer el stream', { status: 500 });
+    }
+
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    const transformedStream = new ReadableStream({
+      async pull(controller) {
+        const { done, value } = await reader.read();
+        if (done) {
+          // Enviar cualquier contenido restante en el buffer (sin el marcador)
+          const cleaned = buffer.replace(REFERRAL_MARKER, '').trimEnd();
+          if (cleaned.length > 0) {
+            controller.enqueue(encoder.encode(cleaned));
+          }
+          controller.close();
+          return;
+        }
+
+        buffer += decoder.decode(value, { stream: true });
+
+        // Si el buffer contiene el marcador completo, limpiarlo
+        if (buffer.includes(REFERRAL_MARKER)) {
+          const cleaned = buffer.replace(REFERRAL_MARKER, '').trimEnd();
+          buffer = '';
+          if (cleaned.length > 0) {
+            controller.enqueue(encoder.encode(cleaned));
+          }
+        } else if (buffer.length > REFERRAL_MARKER.length * 2) {
+          // Enviar la parte segura del buffer (que no puede ser parte del marcador)
+          const safeLength = buffer.length - REFERRAL_MARKER.length;
+          const safePart = buffer.substring(0, safeLength);
+          buffer = buffer.substring(safeLength);
+          if (safePart.length > 0) {
+            controller.enqueue(encoder.encode(safePart));
+          }
+        }
       },
     });
 
-    return result.toTextStreamResponse();
+    return new Response(transformedStream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Transfer-Encoding': 'chunked',
+      },
+    });
   } catch (error) {
     console.error('Chat API error:', error);
     return new Response('Error interno del servidor', { status: 500 });

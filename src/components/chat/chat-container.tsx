@@ -2,18 +2,36 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Brain, RefreshCw } from 'lucide-react';
+import { Brain, RefreshCw, Download } from 'lucide-react';
 import { ChatMessage } from './chat-message';
 import { ChatInput } from './chat-input';
 import { LockdownMode } from './lockdown-mode';
+import { ReferralBlock } from './referral-block';
+import { ReferralForm } from './referral-form';
+import { ConsentScreen } from './consent-screen';
 import { detectRisk } from '@/lib/utils/risk-detector';
 import { Button } from '@/components/ui';
 import { useChatCustom } from '@/hooks/use-chat';
+import { exportChatAsPDF } from '@/lib/utils/export-pdf';
 
 export function ChatContainer() {
   const t = useTranslations();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showLockdown, setShowLockdown] = useState(false);
+  const [ipBlocked, setIpBlocked] = useState(false);
+  const [blockedUntil, setBlockedUntil] = useState<string | null>(null);
+  const [checkingIP, setCheckingIP] = useState(true);
+  const [showReferralForm, setShowReferralForm] = useState(false);
+  const [referralContexto, setReferralContexto] = useState('');
+  const [hasConsent, setHasConsent] = useState(false);
+
+  // Verificar consentimiento guardado
+  useEffect(() => {
+    const consent = localStorage.getItem('ego-core-consent');
+    if (consent === 'true') {
+      setHasConsent(true);
+    }
+  }, []);
 
   const {
     messages,
@@ -26,20 +44,45 @@ export function ChatContainer() {
     onError: (error) => {
       console.error('Chat error:', error);
     },
+    onBlocked: (until) => {
+      setIpBlocked(true);
+      setBlockedUntil(until);
+    },
+    onReferralNeeded: (contexto) => {
+      setReferralContexto(contexto);
+      setShowReferralForm(true);
+    },
   });
 
-  // Scroll to bottom on new messages
+  // Verificar estado de IP al montar
+  useEffect(() => {
+    async function checkIP() {
+      try {
+        const response = await fetch('/api/check-ip');
+        const data = await response.json();
+        if (data.blocked) {
+          setIpBlocked(true);
+          setBlockedUntil(data.blockedUntil);
+        }
+      } catch (err) {
+        console.error('Error checking IP:', err);
+      } finally {
+        setCheckingIP(false);
+      }
+    }
+    checkIP();
+  }, []);
+
+  // Scroll al último mensaje
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Check for risk before sending (client-side check)
   async function handleSend(content: string) {
     const risk = detectRisk(content);
     if (risk.shouldActivateLockdown) {
       setShowLockdown(true);
     }
-
     await sendMessage(content);
   }
 
@@ -51,9 +94,46 @@ export function ChatContainer() {
     setShowLockdown(false);
   }
 
-  // Lockdown mode overlay
+  function handleReferralComplete() {
+    setShowReferralForm(false);
+    // El usuario puede seguir chateando 2 días más
+  }
+
+  // Estado de carga mientras verifica IP
+  if (checkingIP) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+        <div className="flex flex-col items-center gap-4">
+          <Brain className="w-10 h-10 text-cyan-500 animate-pulse" />
+          <p className="text-zinc-500">{t('common.loading')}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Pantalla de consentimiento
+  if (!hasConsent) {
+    return <ConsentScreen onAccept={() => setHasConsent(true)} />;
+  }
+
+  // Pantalla de IP bloqueada
+  if (ipBlocked) {
+    return <ReferralBlock blockedUntil={blockedUntil} />;
+  }
+
+  // Overlay de lockdown
   if (showLockdown) {
     return <LockdownMode onDismiss={handleDismissLockdown} />;
+  }
+
+  // Formulario de derivación
+  if (showReferralForm) {
+    return (
+      <ReferralForm
+        contexto={referralContexto}
+        onComplete={handleReferralComplete}
+      />
+    );
   }
 
   return (
@@ -70,13 +150,21 @@ export function ChatContainer() {
           </div>
         </div>
 
-        <Button variant="ghost" size="sm" onClick={handleNewChat}>
-          <RefreshCw className="w-4 h-4" />
-          {t('chat.newConversation')}
-        </Button>
+        <div className="flex gap-2">
+          {messages.length > 0 && (
+            <Button variant="ghost" size="sm" onClick={() => exportChatAsPDF(messages)}>
+              <Download className="w-4 h-4" />
+              PDF
+            </Button>
+          )}
+          <Button variant="ghost" size="sm" onClick={handleNewChat}>
+            <RefreshCw className="w-4 h-4" />
+            {t('chat.newConversation')}
+          </Button>
+        </div>
       </div>
 
-      {/* Messages area */}
+      {/* Área de mensajes */}
       <div className="flex-1 overflow-y-auto py-6 space-y-6">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
@@ -87,7 +175,7 @@ export function ChatContainer() {
               {t('chat.title')}
             </h2>
             <p className="text-zinc-500 max-w-md">
-              Estoy aquí para escucharte. Cuéntame cómo te sientes hoy o qué tienes en mente.
+              {t('chat.welcome')}
             </p>
           </div>
         ) : (
@@ -101,7 +189,7 @@ export function ChatContainer() {
           ))
         )}
 
-        {/* Loading indicator */}
+        {/* Indicador de carga */}
         {isLoading && messages[messages.length - 1]?.role === 'user' && (
           <div className="flex gap-4">
             <div className="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center">
@@ -117,7 +205,7 @@ export function ChatContainer() {
           </div>
         )}
 
-        {/* Error display */}
+        {/* Error */}
         {error && (
           <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
             {t('errors.generic')}
