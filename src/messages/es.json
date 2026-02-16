@@ -41,7 +41,18 @@
     "weeklyOverview": "Resumen semanal",
     "recentActivity": "Actividad reciente",
     "quickActions": "Acciones rápidas",
-    "noDataYet": "Aún no hay datos. ¡Comienza registrando tu estado de ánimo!"
+    "noDataYet": "Aún no hay datos. ¡Comienza registrando tu estado de ánimo!",
+    "wellness": "Bienestar",
+    "calendly": "Agendar turno"
+  },
+  "dashboardEditor": {
+    "editMode": "Personalizar",
+    "done": "Listo",
+    "addWidget": "Agregar widgets ocultos",
+    "removeWidget": "Ocultar",
+    "moveUp": "Mover arriba",
+    "moveDown": "Mover abajo",
+    "resetTemplate": "Restablecer"
   },
   "mood": {
     "title": "Estado de Ánimo",
@@ -98,23 +109,53 @@
     }
   },
   "chat": {
-    "title": "Asistente Terapéutico",
-    "placeholder": "Escribe cómo te sientes...",
+    "title": "Asistente del Profesional",
+    "placeholder": "Escribí cómo te sentís...",
     "send": "Enviar",
     "thinking": "Procesando...",
-    "disclaimer": "Este asistente no reemplaza la atención profesional de salud mental.",
-    "newConversation": "Nueva conversación"
+    "disclaimer": "Este asistente es una herramienta de apoyo del profesional. No reemplaza la atención profesional de salud mental.",
+    "newConversation": "Nueva conversación",
+    "welcome": "Soy el asistente de tu profesional de salud mental. Estoy acá para escucharte. Contame cómo te sentís hoy o qué tenés en mente."
   },
   "emergency": {
-    "title": "Modo de Emergencia",
+    "title": "Atención Necesaria",
     "message": "Detectamos que podrías estar pasando por un momento difícil.",
     "notAlone": "No estás solo/a. Hay ayuda disponible.",
-    "callNow": "Llamar ahora",
-    "callProfessional": "Contactar profesional",
+    "contactNow": "Contactar profesional ahora",
+    "callProfessional": "Profesional",
     "resources": "Recursos de ayuda",
     "crisisLine": "Línea de crisis",
     "dismiss": "Estoy bien, continuar",
-    "confirmDismiss": "¿Estás seguro/a de que deseas continuar?"
+    "confirmDismiss": "¿Estás seguro/a de que deseas continuar?",
+    "imOkay": "Sí, estoy bien",
+    "scheduleAppointment": "Agendar turno"
+  },
+  "referral": {
+    "title": "Atención Profesional Requerida",
+    "message": "Hemos detectado que necesitás atención profesional personalizada.",
+    "explanation": "Para tu bienestar, te pedimos que contactes directamente a la profesional. El chat estará disponible nuevamente una vez que hayas tenido la oportunidad de conectar con ella.",
+    "contactProfessional": "Enviar email a la profesional",
+    "email": "Email",
+    "availableAgain": "El chat estará disponible nuevamente el {date}",
+    "scheduleAppointment": "Agendar turno con la profesional"
+  },
+  "referralForm": {
+    "title": "Conectate con la profesional",
+    "description": "Completá tus datos para que la profesional pueda contactarte. Vas a poder seguir usando el chat durante 2 días más.",
+    "nombre": "Nombre",
+    "nombrePlaceholder": "Tu nombre",
+    "apellido": "Apellido",
+    "apellidoPlaceholder": "Tu apellido",
+    "telefono": "Teléfono",
+    "telefonoPlaceholder": "+54 11 1234-5678",
+    "email": "Email",
+    "emailPlaceholder": "tu@email.com",
+    "submit": "Enviar datos a la profesional",
+    "sending": "Enviando...",
+    "privacy": "Tus datos se envían directamente a la profesional y no se comparten con terceros.",
+    "successTitle": "Datos enviados correctamente",
+    "successMessage": "La profesional recibirá tus datos y se pondrá en contacto con vos. Podés seguir usando el chat durante 2 días más.",
+    "scheduleAppointment": "Agendar turno"
   },
   "settings": {
     "title": "Configuración",
@@ -157,6 +198,20 @@
     "step4Description": "Tus datos están encriptados y anonimizados. Tienes control total sobre tu información.",
     "getStarted": "Comenzar",
     "skip": "Saltar"
+  },
+  "consent": {
+    "title": "Antes de comenzar",
+    "subtitle": "Por favor leé y aceptá los términos de uso del asistente.",
+    "section1Title": "Naturaleza del servicio",
+    "section1": "Ego-Core es un asistente de inteligencia artificial que funciona como herramienta de apoyo de una profesional de psicología. NO es un servicio de terapia, diagnóstico ni tratamiento de salud mental.",
+    "section2Title": "Derivación profesional",
+    "section2": "Si el asistente detecta que necesitás atención profesional, te va a pedir tus datos para que la profesional pueda contactarte. Después de la derivación, el chat estará disponible por 2 días más.",
+    "section3Title": "Privacidad",
+    "section3": "Tus conversaciones son procesadas por inteligencia artificial. La información personal se anonimiza antes del procesamiento. Tus datos de contacto solo se comparten con la profesional cuando completás el formulario de derivación.",
+    "section4Title": "Limitaciones",
+    "section4": "En caso de emergencia o crisis, contactá al Centro de Asistencia al Suicida (135) o al servicio de emergencias (107). Este asistente no reemplaza la atención profesional de salud mental.",
+    "acceptTerms": "He leído y acepto los términos de uso. Entiendo que este asistente no reemplaza la atención profesional.",
+    "continue": "Aceptar y continuar"
   },
   "errors": {
     "generic": "Algo salió mal. Por favor, intenta de nuevo.",

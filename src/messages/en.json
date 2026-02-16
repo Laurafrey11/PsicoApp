@@ -41,7 +41,18 @@
     "weeklyOverview": "Weekly overview",
     "recentActivity": "Recent activity",
     "quickActions": "Quick actions",
-    "noDataYet": "No data yet. Start by recording your mood!"
+    "noDataYet": "No data yet. Start by recording your mood!",
+    "wellness": "Wellness",
+    "calendly": "Schedule appointment"
+  },
+  "dashboardEditor": {
+    "editMode": "Customize",
+    "done": "Done",
+    "addWidget": "Add hidden widgets",
+    "removeWidget": "Hide",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "resetTemplate": "Reset"
   },
   "mood": {
     "title": "Mood",
@@ -98,23 +109,53 @@
     }
   },
   "chat": {
-    "title": "Therapeutic Assistant",
+    "title": "Professional's Assistant",
     "placeholder": "Write how you feel...",
     "send": "Send",
     "thinking": "Processing...",
-    "disclaimer": "This assistant does not replace professional mental health care.",
-    "newConversation": "New conversation"
+    "disclaimer": "This assistant is a professional's support tool. It does not replace professional mental health care.",
+    "newConversation": "New conversation",
+    "welcome": "I'm your mental health professional's assistant. I'm here to listen. Tell me how you're feeling today or what's on your mind."
   },
   "emergency": {
-    "title": "Emergency Mode",
+    "title": "Attention Needed",
     "message": "We detected you might be going through a difficult time.",
     "notAlone": "You are not alone. Help is available.",
-    "callNow": "Call now",
-    "callProfessional": "Contact professional",
+    "contactNow": "Contact professional now",
+    "callProfessional": "Professional",
     "resources": "Help resources",
     "crisisLine": "Crisis line",
     "dismiss": "I'm okay, continue",
-    "confirmDismiss": "Are you sure you want to continue?"
+    "confirmDismiss": "Are you sure you want to continue?",
+    "imOkay": "Yes, I'm okay",
+    "scheduleAppointment": "Schedule appointment"
+  },
+  "referral": {
+    "title": "Professional Attention Required",
+    "message": "We've detected that you need personalized professional attention.",
+    "explanation": "For your wellbeing, we ask that you contact the professional directly. Chat will be available again once you've had the opportunity to connect with her.",
+    "contactProfessional": "Send email to professional",
+    "email": "Email",
+    "availableAgain": "Chat will be available again on {date}",
+    "scheduleAppointment": "Schedule appointment with professional"
+  },
+  "referralForm": {
+    "title": "Connect with the professional",
+    "description": "Fill in your details so the professional can reach out to you. You can continue using the chat for 2 more days.",
+    "nombre": "First name",
+    "nombrePlaceholder": "Your first name",
+    "apellido": "Last name",
+    "apellidoPlaceholder": "Your last name",
+    "telefono": "Phone",
+    "telefonoPlaceholder": "+1 234 567-8900",
+    "email": "Email",
+    "emailPlaceholder": "you@email.com",
+    "submit": "Send info to professional",
+    "sending": "Sending...",
+    "privacy": "Your data is sent directly to the professional and is not shared with third parties.",
+    "successTitle": "Information sent successfully",
+    "successMessage": "The professional will receive your data and get in touch with you. You can continue using the chat for 2 more days.",
+    "scheduleAppointment": "Schedule appointment"
   },
   "settings": {
     "title": "Settings",
@@ -157,6 +198,20 @@
     "step4Description": "Your data is encrypted and anonymized. You have full control over your information.",
     "getStarted": "Get started",
     "skip": "Skip"
+  },
+  "consent": {
+    "title": "Before we begin",
+    "subtitle": "Please read and accept the terms of use for the assistant.",
+    "section1Title": "Nature of the service",
+    "section1": "Ego-Core is an artificial intelligence assistant that works as a support tool for a psychology professional. It is NOT a therapy, diagnosis, or mental health treatment service.",
+    "section2Title": "Professional referral",
+    "section2": "If the assistant detects that you need professional attention, it will ask for your contact information so the professional can reach out to you. After referral, chat will be available for 2 more days.",
+    "section3Title": "Privacy",
+    "section3": "Your conversations are processed by artificial intelligence. Personal information is anonymized before processing. Your contact data is only shared with the professional when you complete the referral form.",
+    "section4Title": "Limitations",
+    "section4": "In case of emergency or crisis, contact your local emergency services or crisis hotline. This assistant does not replace professional mental health care.",
+    "acceptTerms": "I have read and accept the terms of use. I understand that this assistant does not replace professional care.",
+    "continue": "Accept and continue"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
