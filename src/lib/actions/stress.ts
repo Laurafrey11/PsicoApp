@@ -132,9 +132,9 @@ export async function saveStressLog(data: StressFormData): Promise<StressResult>
     return { error: 'Error al guardar el registro' };
   }
 
-  revalidatePath('/stress');
   revalidatePath('/dashboard');
   revalidatePath('/analytics');
+  revalidatePath('/mood');
 
   return {
     success: true,

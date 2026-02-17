@@ -10,7 +10,6 @@ import {
   Heart,
   MessageCircle,
   TrendingUp,
-  Zap,
   Settings,
   Menu,
   X,
@@ -27,7 +26,6 @@ export function DashboardNav() {
     { href: '/mood', icon: Heart, label: t('mood.title') },
     { href: '/chat', icon: MessageCircle, label: t('chat.title') },
     { href: '/analytics', icon: TrendingUp, label: t('analytics.title') },
-    { href: '/stress', icon: Zap, label: t('stress.title') },
     { href: '/settings', icon: Settings, label: t('settings.title') },
   ];
 

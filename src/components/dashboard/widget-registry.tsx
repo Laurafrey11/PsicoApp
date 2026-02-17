@@ -1,6 +1,6 @@
 'use client';
 
-import { Heart, MessageCircle, TrendingUp, Brain, Meh, ArrowRight, Calendar } from 'lucide-react';
+import { Heart, MessageCircle, TrendingUp, CreditCard, Meh, ArrowRight, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { WellnessIndicators } from './wellness-indicators';
@@ -57,15 +57,15 @@ function QuickActionsWidget() {
         </Card>
       </Link>
 
-      <Link href="/stress">
-        <Card className="group cursor-pointer transition-all hover:border-orange-500/30 hover:shadow-lg hover:shadow-orange-500/5">
+      <Link href="/billing">
+        <Card className="group cursor-pointer transition-all hover:border-violet-500/30 hover:shadow-lg hover:shadow-violet-500/5">
           <CardContent className="flex items-center gap-4 py-4">
-            <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center group-hover:bg-orange-500/20 transition-colors">
-              <Brain className="w-6 h-6 text-orange-400" />
+            <div className="w-12 h-12 rounded-xl bg-violet-500/10 flex items-center justify-center group-hover:bg-violet-500/20 transition-colors">
+              <CreditCard className="w-6 h-6 text-violet-400" />
             </div>
             <div>
-              <h3 className="font-medium text-zinc-100">Estrés</h3>
-              <p className="text-sm text-zinc-500">Registrar episodio</p>
+              <h3 className="font-medium text-zinc-100">Facturación</h3>
+              <p className="text-sm text-zinc-500">Uso y pagos</p>
             </div>
           </CardContent>
         </Card>
