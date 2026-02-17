@@ -9,6 +9,8 @@ import { LockdownMode } from './lockdown-mode';
 import { ReferralBlock } from './referral-block';
 import { ReferralForm } from './referral-form';
 import { ConsentScreen } from './consent-screen';
+import { AuthRequired } from './auth-required';
+import { BillingBlock } from '@/components/billing/billing-block';
 import { detectRisk } from '@/lib/utils/risk-detector';
 import { Button } from '@/components/ui';
 import { useChatCustom } from '@/hooks/use-chat';
@@ -24,6 +26,10 @@ export function ChatContainer() {
   const [showReferralForm, setShowReferralForm] = useState(false);
   const [referralContexto, setReferralContexto] = useState('');
   const [hasConsent, setHasConsent] = useState(false);
+  const [authRequired, setAuthRequired] = useState(false);
+  const [billingBlocked, setBillingBlocked] = useState(false);
+  const [billingInvoiceId, setBillingInvoiceId] = useState<string | null>(null);
+  const [billingAmount, setBillingAmount] = useState<number>(0);
 
   // Verificar consentimiento guardado
   useEffect(() => {
@@ -51,6 +57,14 @@ export function ChatContainer() {
     onReferralNeeded: (contexto) => {
       setReferralContexto(contexto);
       setShowReferralForm(true);
+    },
+    onAuthRequired: () => {
+      setAuthRequired(true);
+    },
+    onBillingBlocked: (invoiceId, amountUsd) => {
+      setBillingBlocked(true);
+      setBillingInvoiceId(invoiceId);
+      setBillingAmount(amountUsd);
     },
   });
 
@@ -109,6 +123,16 @@ export function ChatContainer() {
         </div>
       </div>
     );
+  }
+
+  // Pantalla de auth requerida
+  if (authRequired) {
+    return <AuthRequired />;
+  }
+
+  // Pantalla de billing bloqueado
+  if (billingBlocked && billingInvoiceId) {
+    return <BillingBlock invoiceId={billingInvoiceId} amountUsd={billingAmount} />;
   }
 
   // Pantalla de consentimiento

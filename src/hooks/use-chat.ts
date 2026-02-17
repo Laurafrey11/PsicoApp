@@ -13,6 +13,8 @@ interface UseChatOptions {
   onError?: (error: Error) => void;
   onBlocked?: (blockedUntil: string | null) => void;
   onReferralNeeded?: (contexto: string) => void;
+  onAuthRequired?: () => void;
+  onBillingBlocked?: (invoiceId: string, amountUsd: number) => void;
 }
 
 interface UseChatReturn {
@@ -26,7 +28,7 @@ interface UseChatReturn {
 const REFERRAL_MARKER = '[DERIVAR_PROFESIONAL]';
 
 export function useChatCustom(options: UseChatOptions = {}): UseChatReturn {
-  const { api = '/api/chat', onError, onBlocked, onReferralNeeded } = options;
+  const { api = '/api/chat', onError, onBlocked, onReferralNeeded, onAuthRequired, onBillingBlocked } = options;
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -68,6 +70,16 @@ export function useChatCustom(options: UseChatOptions = {}): UseChatReturn {
           }
           if (data.blocked) {
             onBlocked?.(data.blockedUntil ?? null);
+            setIsLoading(false);
+            return;
+          }
+          if (data.authRequired) {
+            onAuthRequired?.();
+            setIsLoading(false);
+            return;
+          }
+          if (data.billingBlocked) {
+            onBillingBlocked?.(data.invoiceId, data.amountUsd);
             setIsLoading(false);
             return;
           }
@@ -128,7 +140,7 @@ export function useChatCustom(options: UseChatOptions = {}): UseChatReturn {
         setIsLoading(false);
       }
     },
-    [api, messages, onError, onBlocked, onReferralNeeded]
+    [api, messages, onError, onBlocked, onReferralNeeded, onAuthRequired, onBillingBlocked]
   );
 
   return {
