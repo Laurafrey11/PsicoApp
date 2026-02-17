@@ -77,7 +77,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [tokenMetrics, setTokenMetrics] = useState<TokenMetric[]>([]);
   const [markingPaid, setMarkingPaid] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'metrics' | 'billing' | 'referrals'>('metrics');
+  const [activeTab, setActiveTab] = useState<'metrics' | 'billing'>('metrics');
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -260,6 +260,39 @@ export default function AdminPage() {
                 <p className="text-2xl font-bold text-zinc-100">{stats.unpaidInvoices}</p>
               </div>
             </div>
+
+            {/* Referral stats row */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                    <ShieldAlert className="w-5 h-5 text-amber-500" />
+                  </div>
+                  <span className="text-zinc-400 text-sm">Total derivaciones</span>
+                </div>
+                <p className="text-2xl font-bold text-zinc-100">{stats.totalReferrals}</p>
+              </div>
+
+              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center">
+                    <Lock className="w-5 h-5 text-red-500" />
+                  </div>
+                  <span className="text-zinc-400 text-sm">Bloqueados (derivación)</span>
+                </div>
+                <p className="text-2xl font-bold text-zinc-100">{stats.activeBlocks}</p>
+              </div>
+
+              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-cyan-500" />
+                  </div>
+                  <span className="text-zinc-400 text-sm">En período de gracia</span>
+                </div>
+                <p className="text-2xl font-bold text-zinc-100">{stats.pendingReferrals}</p>
+              </div>
+            </div>
           </div>
         )}
 
@@ -287,72 +320,122 @@ export default function AdminPage() {
             <CreditCard className="w-4 h-4 inline mr-2" />
             Facturación
           </button>
-          <button
-            onClick={() => setActiveTab('referrals')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === 'referrals'
-                ? 'bg-zinc-800 text-zinc-100'
-                : 'text-zinc-500 hover:text-zinc-300'
-            }`}
-          >
-            <ShieldAlert className="w-4 h-4 inline mr-2" />
-            Derivaciones
-          </button>
         </div>
 
         {/* Metrics Tab */}
         {activeTab === 'metrics' && (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-zinc-800">
-              <h2 className="text-lg font-semibold text-zinc-100">Consumo de tokens por usuario (últimos 30 días)</h2>
+          <div className="space-y-6">
+            {/* Token consumption table */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+              <div className="px-6 py-4 border-b border-zinc-800">
+                <h2 className="text-lg font-semibold text-zinc-100">Consumo de tokens por usuario (últimos 30 días)</h2>
+              </div>
+
+              {tokenMetrics.length === 0 ? (
+                <div className="text-center py-12">
+                  <BarChart3 className="w-12 h-12 text-zinc-700 mx-auto mb-3" />
+                  <p className="text-zinc-500">No hay consumo registrado</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="text-left text-xs text-zinc-500 uppercase tracking-wider">
+                        <th className="px-6 py-3">Usuario</th>
+                        <th className="px-6 py-3 text-right">Mensajes</th>
+                        <th className="px-6 py-3 text-right">Tokens</th>
+                        <th className="px-6 py-3 text-right">Costo estimado</th>
+                        <th className="px-6 py-3">Uso</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-800">
+                      {tokenMetrics.map((metric) => {
+                        const maxTokens = tokenMetrics[0]?.totalTokens || 1;
+                        const percentage = Math.round((metric.totalTokens / maxTokens) * 100);
+                        return (
+                          <tr key={metric.userId} className="hover:bg-zinc-800/50">
+                            <td className="px-6 py-4 text-sm text-zinc-300">{metric.email}</td>
+                            <td className="px-6 py-4 text-sm text-zinc-400 text-right">{metric.messageCount}</td>
+                            <td className="px-6 py-4 text-sm text-zinc-200 text-right font-mono">
+                              {metric.totalTokens.toLocaleString('es-AR')}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-right font-semibold gradient-text">
+                              ${metric.estimatedCost.toFixed(2)}
+                            </td>
+                            <td className="px-6 py-4 w-40">
+                              <div className="w-full bg-zinc-800 rounded-full h-2">
+                                <div
+                                  className="bg-gradient-to-r from-cyan-500 to-teal-400 h-2 rounded-full"
+                                  style={{ width: `${percentage}%` }}
+                                />
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
 
-            {tokenMetrics.length === 0 ? (
-              <div className="text-center py-12">
-                <BarChart3 className="w-12 h-12 text-zinc-700 mx-auto mb-3" />
-                <p className="text-zinc-500">No hay consumo registrado</p>
+            {/* Referrals table */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+              <div className="px-6 py-4 border-b border-zinc-800">
+                <h2 className="text-lg font-semibold text-zinc-100">Derivaciones (bloqueo 30 días)</h2>
               </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="text-left text-xs text-zinc-500 uppercase tracking-wider">
-                      <th className="px-6 py-3">Usuario</th>
-                      <th className="px-6 py-3 text-right">Mensajes</th>
-                      <th className="px-6 py-3 text-right">Tokens</th>
-                      <th className="px-6 py-3 text-right">Costo estimado</th>
-                      <th className="px-6 py-3">Uso</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-800">
-                    {tokenMetrics.map((metric) => {
-                      const maxTokens = tokenMetrics[0]?.totalTokens || 1;
-                      const percentage = Math.round((metric.totalTokens / maxTokens) * 100);
-                      return (
-                        <tr key={metric.userId} className="hover:bg-zinc-800/50">
-                          <td className="px-6 py-4 text-sm text-zinc-300">{metric.email}</td>
-                          <td className="px-6 py-4 text-sm text-zinc-400 text-right">{metric.messageCount}</td>
-                          <td className="px-6 py-4 text-sm text-zinc-200 text-right font-mono">
-                            {metric.totalTokens.toLocaleString('es-AR')}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-right font-semibold gradient-text">
-                            ${metric.estimatedCost.toFixed(2)}
-                          </td>
-                          <td className="px-6 py-4 w-40">
-                            <div className="w-full bg-zinc-800 rounded-full h-2">
-                              <div
-                                className="bg-gradient-to-r from-cyan-500 to-teal-400 h-2 rounded-full"
-                                style={{ width: `${percentage}%` }}
-                              />
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
+
+              {referrals.length === 0 ? (
+                <div className="text-center py-12">
+                  <Eye className="w-12 h-12 text-zinc-700 mx-auto mb-3" />
+                  <p className="text-zinc-500">No hay derivaciones registradas</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="text-left text-xs text-zinc-500 uppercase tracking-wider">
+                        <th className="px-6 py-3">IP</th>
+                        <th className="px-6 py-3">Estado</th>
+                        <th className="px-6 py-3">Derivada</th>
+                        <th className="px-6 py-3">Intentos</th>
+                        <th className="px-6 py-3">Bloqueo hasta</th>
+                        <th className="px-6 py-3">Motivo</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-800">
+                      {referrals.map((referral) => {
+                        const status = getStatus(referral);
+                        return (
+                          <tr key={referral.id} className="hover:bg-zinc-800/50">
+                            <td className="px-6 py-4 font-mono text-sm text-zinc-300">
+                              {referral.ip_address}
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${status.color}`}>
+                                {status.label}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-zinc-400">
+                              {formatDate(referral.referred_at)}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-zinc-400">
+                              {referral.attempts_after_referral}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-zinc-400">
+                              {referral.blocked_until ? formatDate(referral.blocked_until) : '-'}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-zinc-500 max-w-xs truncate">
+                              {referral.reason || '-'}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -437,65 +520,6 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Referrals Tab */}
-        {activeTab === 'referrals' && (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-zinc-800">
-              <h2 className="text-lg font-semibold text-zinc-100">Derivaciones</h2>
-            </div>
-
-            {referrals.length === 0 ? (
-              <div className="text-center py-12">
-                <Eye className="w-12 h-12 text-zinc-700 mx-auto mb-3" />
-                <p className="text-zinc-500">No hay derivaciones registradas</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="text-left text-xs text-zinc-500 uppercase tracking-wider">
-                      <th className="px-6 py-3">IP</th>
-                      <th className="px-6 py-3">Estado</th>
-                      <th className="px-6 py-3">Derivada</th>
-                      <th className="px-6 py-3">Intentos</th>
-                      <th className="px-6 py-3">Bloqueo hasta</th>
-                      <th className="px-6 py-3">Motivo</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-800">
-                    {referrals.map((referral) => {
-                      const status = getStatus(referral);
-                      return (
-                        <tr key={referral.id} className="hover:bg-zinc-800/50">
-                          <td className="px-6 py-4 font-mono text-sm text-zinc-300">
-                            {referral.ip_address}
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${status.color}`}>
-                              {status.label}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-sm text-zinc-400">
-                            {formatDate(referral.referred_at)}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-zinc-400">
-                            {referral.attempts_after_referral}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-zinc-400">
-                            {referral.blocked_until ? formatDate(referral.blocked_until) : '-'}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-zinc-500 max-w-xs truncate">
-                            {referral.reason || '-'}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Footer */}
         <div className="mt-8 flex items-center justify-center gap-2 text-zinc-600 text-sm">

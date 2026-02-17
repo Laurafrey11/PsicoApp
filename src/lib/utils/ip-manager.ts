@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-const BLOCK_DURATION_DAYS = 90; // 3 meses
+const BLOCK_DURATION_DAYS = 30; // 1 mes
 const REFERRAL_GRACE_PERIOD_DAYS = 2;
 
 export interface IPStatus {
