@@ -11,6 +11,11 @@ interface CsvEntry {
   sueno?: number;
   emocion?: string;
   notas?: string;
+  // Stress fields
+  estres?: number;
+  situacion?: string;
+  sintomas?: string;
+  pensamientos?: string;
 }
 
 export async function POST(request: Request) {
@@ -27,7 +32,8 @@ export async function POST(request: Request) {
 
     const supabase = createAdminClient();
 
-    const insertData = entries.map((entry) => ({
+    // Insert mood entries
+    const moodData = entries.map((entry) => ({
       user_id: ANONYMOUS_USER_ID,
       mood_score: entry.animo,
       energy_level: entry.energia ?? null,
@@ -38,14 +44,54 @@ export async function POST(request: Request) {
       recorded_at: new Date(entry.fecha).toISOString(),
     }));
 
-    const { error } = await supabase.from('mood_entries').insert(insertData);
+    const { error: moodError } = await supabase.from('mood_entries').insert(moodData);
 
-    if (error) {
-      console.error('Error importing CSV:', error);
-      return NextResponse.json({ imported: 0, errors: [error.message] });
+    if (moodError) {
+      console.error('Error importing mood entries:', moodError);
+      return NextResponse.json({ imported: 0, errors: [moodError.message] });
     }
 
-    return NextResponse.json({ imported: entries.length, errors: [] });
+    // Insert stress logs for entries that have stress data
+    const stressEntries = entries.filter((e) => e.estres || e.situacion);
+    let stressImported = 0;
+
+    if (stressEntries.length > 0) {
+      const stressData = stressEntries.map((entry) => {
+        // Parse symptoms: comma-separated string → array
+        const symptoms = entry.sintomas
+          ? entry.sintomas.split(',').map((s) => s.trim()).filter(Boolean)
+          : [];
+
+        return {
+          user_id: ANONYMOUS_USER_ID,
+          intensity: entry.estres || 5,
+          situation: entry.situacion || entry.notas || 'Importado desde CSV',
+          physical_symptoms: symptoms,
+          thoughts: entry.pensamientos || null,
+          occurred_at: new Date(entry.fecha).toISOString(),
+        };
+      });
+
+      const { error: stressError } = await supabase.from('stress_logs').insert(stressData);
+
+      if (stressError) {
+        console.error('Error importing stress logs:', stressError);
+        // Don't fail the whole import, mood was already saved
+        return NextResponse.json({
+          imported: entries.length,
+          stressImported: 0,
+          errors: [`Ánimo importado OK. Error en estrés: ${stressError.message}`],
+        });
+      }
+
+      stressImported = stressEntries.length;
+    }
+
+    return NextResponse.json({
+      imported: entries.length,
+      stressImported,
+      errors: [],
+    });
   } catch (err) {
     console.error('Import CSV error:', err);
     return NextResponse.json({ imported: 0, errors: ['Error interno del servidor'] });
