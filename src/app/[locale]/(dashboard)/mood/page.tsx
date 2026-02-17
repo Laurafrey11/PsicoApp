@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { Heart } from 'lucide-react';
-import { MoodForm } from '@/components/mood';
+import { UnifiedEntryForm } from '@/components/mood';
 
 export default async function MoodPage() {
   const t = await getTranslations();
@@ -16,12 +16,12 @@ export default async function MoodPage() {
           {t('mood.howAreYou')}
         </h1>
         <p className="text-zinc-400 mt-2">
-          Registra tu estado de ánimo para hacer seguimiento de tu bienestar emocional.
+          Registrá tu estado de ánimo y, si querés, un episodio de estrés.
         </p>
       </div>
 
-      {/* Form */}
-      <MoodForm />
+      {/* Unified Form */}
+      <UnifiedEntryForm />
     </div>
   );
 }

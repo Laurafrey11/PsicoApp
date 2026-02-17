@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { BillingHistory } from './billing-history';
+import { SubscriptionCard } from './subscription-card';
 
 export default async function BillingPage() {
   const t = await getTranslations('billing');
@@ -21,6 +22,15 @@ export default async function BillingPage() {
     .select('*')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
+
+  // Get active subscription
+  const { data: subscription } = await adminSupabase
+    .from('subscriptions')
+    .select('*')
+    .eq('user_id', user.id)
+    .in('status', ['pending', 'authorized'])
+    .limit(1)
+    .maybeSingle();
 
   // Get current month token usage
   const { data: currentUsage } = await adminSupabase
@@ -51,6 +61,12 @@ export default async function BillingPage() {
           </div>
         </div>
       </div>
+
+      {/* Subscription card */}
+      <SubscriptionCard
+        isSubscribed={subscription?.status === 'authorized'}
+        isPending={subscription?.status === 'pending'}
+      />
 
       {/* Invoice history */}
       <BillingHistory invoices={invoices || []} />

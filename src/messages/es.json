@@ -288,6 +288,17 @@
       "explanation": "Creá una cuenta o iniciá sesión para continuar.",
       "signIn": "Iniciar sesión",
       "signUp": "Crear cuenta gratis"
+    },
+    "subscription": {
+      "title": "Débito automático",
+      "description": "Activá el débito automático para que se te cobre mensualmente sin tener que pagar manualmente. Podés cancelar cuando quieras.",
+      "activeDescription": "Tenés débito automático activo. Se te cobra automáticamente cada mes según tu consumo de tokens.",
+      "subscribe": "Activar débito automático",
+      "cancel": "Cancelar débito automático",
+      "confirmCancel": "¿Estás seguro/a de que querés cancelar el débito automático? Vas a tener que pagar manualmente cada mes.",
+      "active": "Activo",
+      "pending": "Pendiente",
+      "pendingMessage": "Tu suscripción está siendo procesada. Esto puede tardar unos minutos."
     }
   },
   "errors": {

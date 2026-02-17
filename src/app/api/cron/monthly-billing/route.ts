@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { calculateCost, generateInvoiceNumber, getBillingPeriod, isBillingAnniversary } from '@/lib/billing/calculations';
-import { invoiceEmailHtml } from '@/lib/billing/email-templates';
+import { invoiceEmailHtml, receiptEmailHtml } from '@/lib/billing/email-templates';
+import { getPreferenceClient } from '@/lib/mercadopago/client';
 import nodemailer from 'nodemailer';
 
 function verifyCronSecret(req: Request): boolean {
@@ -76,7 +77,18 @@ export async function GET(req: Request) {
         total_cost_usd: amountUsd,
       });
 
-      // Create invoice
+      // Check if user has active subscription (débito automático)
+      const { data: subscription } = await supabase
+        .from('subscriptions')
+        .select('id, mp_preapproval_id')
+        .eq('user_id', user.id)
+        .eq('status', 'authorized')
+        .limit(1)
+        .maybeSingle();
+
+      const isSubscribed = !!subscription;
+
+      // Create invoice - mark as paid immediately for subscribed users
       const { data: invoice } = await supabase
         .from('invoices')
         .insert({
@@ -86,15 +98,71 @@ export async function GET(req: Request) {
           period_end: end.toISOString(),
           total_tokens: totalTokens,
           amount_usd: amountUsd,
-          status: 'sent',
+          status: isSubscribed ? 'paid' : 'sent',
           due_date: dueDate.toISOString(),
           sent_at: new Date().toISOString(),
+          ...(isSubscribed ? { paid_at: new Date().toISOString() } : {}),
         })
         .select('id')
         .single();
 
-      // Send invoice email
-      if (user.email && invoice) {
+      if (isSubscribed && invoice) {
+        // For subscribed users: create a MercadoPago payment preference
+        // and send receipt email instead of invoice
+        try {
+          const preferenceClient = getPreferenceClient();
+          const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://psico-app-chi.vercel.app';
+
+          await preferenceClient.create({
+            body: {
+              items: [{
+                id: invoice.id,
+                title: `Ego-Core - Débito automático ${invoiceNumber}`,
+                description: `Consumo de ${totalTokens.toLocaleString()} tokens IA`,
+                quantity: 1,
+                unit_price: amountUsd,
+                currency_id: 'USD',
+              }],
+              external_reference: invoice.id,
+              notification_url: `${appUrl}/api/billing/webhook`,
+              payer: { email: user.email || undefined },
+            },
+          });
+
+          if (user.email) {
+            const transporter = nodemailer.createTransport({
+              service: 'gmail',
+              auth: {
+                user: process.env.GMAIL_USER,
+                pass: process.env.GMAIL_APP_PASSWORD,
+              },
+            });
+
+            await transporter.sendMail({
+              from: `Ego-Core <${process.env.GMAIL_USER}>`,
+              to: user.email,
+              subject: `Recibo débito automático - ${invoiceNumber}`,
+              html: receiptEmailHtml({
+                userName: user.user_metadata?.full_name || 'Usuario',
+                invoiceNumber,
+                amountUsd,
+                paidAt: new Date().toISOString(),
+              }),
+            });
+          }
+
+          results.push(`Auto-debit ${invoiceNumber} for ${user.email}`);
+        } catch (autoErr) {
+          console.error(`Auto-debit error for ${user.email}:`, autoErr);
+          // Fallback: change invoice to sent so user gets billed normally
+          await supabase
+            .from('invoices')
+            .update({ status: 'sent', paid_at: null })
+            .eq('id', invoice.id);
+          results.push(`Auto-debit failed for ${invoiceNumber}, fallback to manual`);
+        }
+      } else if (user.email && invoice) {
+        // Non-subscribed user: send invoice email
         try {
           const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://psico-app-chi.vercel.app';
           const payUrl = `${appUrl}/es/payment-required?invoice_id=${invoice.id}`;

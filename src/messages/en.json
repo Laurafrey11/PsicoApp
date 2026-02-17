@@ -288,6 +288,17 @@
       "explanation": "Create an account or sign in to continue.",
       "signIn": "Sign in",
       "signUp": "Create free account"
+    },
+    "subscription": {
+      "title": "Automatic billing",
+      "description": "Enable automatic billing to be charged monthly without manual payment. You can cancel anytime.",
+      "activeDescription": "Automatic billing is active. You are charged automatically each month based on your token usage.",
+      "subscribe": "Enable automatic billing",
+      "cancel": "Cancel automatic billing",
+      "confirmCancel": "Are you sure you want to cancel automatic billing? You will need to pay manually each month.",
+      "active": "Active",
+      "pending": "Pending",
+      "pendingMessage": "Your subscription is being processed. This may take a few minutes."
     }
   },
   "errors": {
